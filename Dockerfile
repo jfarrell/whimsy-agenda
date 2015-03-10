@@ -1,44 +1,50 @@
-FROM ubuntu:14.04.2
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-RUN  mkdir -p /srv/var
+FROM ubuntu:trusty
+MAINTAINER Apache Infrastructure <infrastructure@apache.org>
 
+ENV IOJS_VERSION 1.5.1
 ENV PHANTOMJS_VERSION 1.9.8
-ENV IOJS_VERSION 1.5.0
 
-RUN apt-get update -y
-RUN apt-get install -y ruby-full
-RUN apt-get install -y wget
-RUN apt-get install -y subversion
-RUN apt-get install -y xz-utils
-RUN apt-get install -y build-essential
-RUN apt-get install -y libssl-dev
-RUN apt-get install -y libldap2-dev
-RUN apt-get install -y libsasl2-dev
+ENV HOME /root
+ENV DEBIAN_FRONTEND noninteractive
 
-# io.js
-WORKDIR /home
-RUN wget https://iojs.org/dist/v$IOJS_VERSION/iojs-v$IOJS_VERSION-linux-x64.tar.xz
-RUN tar -vxf iojs-v$IOJS_VERSION-linux-x64.tar.xz
-RUN rm -f iojs-v$IOJS_VERSION-linux-x64.tar.xz
-RUN mv iojs-v$IOJS_VERSION-linux-x64/ /srv/var/iojs
-RUN ln -s /srv/var/iojs/bin/iojs /usr/bin/iojs
-RUN ln -s /srv/var/iojs/bin/node /usr/bin/node
-RUN ln -s /srv/var/iojs/bin/npm /usr/bin/npm
+RUN apt-get update && \
+    apt-get -y install build-essential \
+    git subversion mercurial curl lsof \
+    libfreetype6 libfontconfig1 zlib1g-dev libssl-dev libldap2-dev libsasl2-dev
 
-# phantom.js
-RUN apt-get install -y git libfreetype6
-RUN wget https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2
-RUN tar -vxjf phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2
-RUN rm -f phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2
-RUN mv phantomjs-$PHANTOMJS_VERSION-linux-x86_64/ /srv/var/phantomjs
-RUN ln -s /srv/var/phantomjs/bin/phantomjs /usr/bin/phantomjs
+RUN mkdir -p /usr/local/iojs && \
+    curl -sSL https://iojs.org/dist/v${IOJS_VERSION}/iojs-v${IOJS_VERSION}-linux-x64.tar.gz | tar -C /usr/local/iojs -xz --strip-components=1 && \
+    ln -s /usr/local/iojs/bin/iojs /usr/bin/iojs && \
+    ln -s /usr/local/iojs/bin/node /usr/bin/node && \
+    ln -s /usr/local/iojs/bin/npm /usr/bin/npm
 
-# Whimsy Agenda
-RUN apt-get install zlib1g-dev
-RUN gem install bundler
-RUN svn checkout https://svn.apache.org/repos/infra/infrastructure/trunk/projects/whimsy/www/test/board/agenda /home/agenda
-WORKDIR /home/agenda
-RUN npm install
-RUN bundle install
-RUN rake spec
-# RUN rake server:test
+RUN mkdir -p /usr/local/phantomjs && \
+    curl -sSL https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-${PHANTOMJS_VERSION}-linux-x86_64.tar.bz2 | tar -C /usr/local/phantomjs -xj --strip-components=1 && \
+    ln -s /usr/local/phantomjs/bin/phantomjs /usr/bin/phantomjs
+
+RUN curl -sSL https://rvm.io/mpapis.asc | gpg --import - && \
+    curl -L https://get.rvm.io | bash -s stable --ruby && \
+    echo 'gem: --no-rdoc --no-ri' >> /etc/gemrc && \
+    /usr/local/rvm/bin/rvm-shell -c "gem install bundler pry"
+
+# Clean up
+RUN apt-get clean && \
+      rm -rf /var/cache/apt/* && \
+      rm -rf /var/lib/apt/lists/* && \
+      rm -rf /tmp/* && \
+      rm -rf /var/tmp/*
+
+WORKDIR $HOME
+ENTRYPOINT ["/usr/local/rvm/bin/rvm-shell"]

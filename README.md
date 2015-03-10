@@ -61,12 +61,25 @@ Visit [http://localhost:9292/](http://localhost:9292/) in your favorite browser.
 Notes:
 
  * If you don't have PhantomJS installed, or have a version of PhantomJS
-   prior to version 2.0 installed, one test will fail. 
+   prior to version 2.0 installed, one test will fail.
 
  * If you don't have io.js installed, two additional tests will fail.
 
  * The data you see is a sanitized version of actual agendas that have
    been included in the repository for test purposes.
+
+
+Docker Development and Testing
+---
+To build and run the docker development environment
+
+    docker build -t whimsy-agenda .
+    docker run -it -v $(pwd)/:/whimsy whimsy-agenda
+    cd /whimsy
+    npm install
+    bundle install
+    bundle exec rake spec
+    bundle exec rake server:test
 
 
 Viewing Source (Live Results)
@@ -135,7 +148,7 @@ Viewing Source (this time, Actual Code)
 
  * the [views/pages/search.js.rb](views/pages/search.js.rb) file contains the
    code for the search page.  There are more methods defined here.  You will
-   find definitions for these methods in the React 
+   find definitions for these methods in the React
    [Lifecycle Methods](http://facebook.github.io/react/docs/component-specs.html#lifecycle-methods).
    You will see logic mixed with presentation.  React is deadly serious when
    it adopted the slogan "rethink best practices".  What makes this work
@@ -154,7 +167,7 @@ Viewing Source (this time, Actual Code)
    we are directly making use of the browser APIs for updating the
    [history](https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history)
    of the window.
- 
+
  * At this point, I suggest that you make a change.  More specifically, I
    suggest you break something.  Insert the keyword `do` into a random spot
    in either this or another file, and save your changes.  This will cause
@@ -206,7 +219,7 @@ Viewing Source (this time, Actual Code)
    from the js.rb files mentioned above.  Undoubtedly you have seen small
    amounts of JavaScript before but I suspect that much of this looks foreign.
    Nicely indented, vaguely familiar, but very foreign.  Many people these
-   days generate JavaScript.  Popular with React is something called 
+   days generate JavaScript.  Popular with React is something called
    [JSX](http://facebook.github.io/react/docs/jsx-in-depth.html), but
    that's both controversial and [doesn't support if
    statements](http://facebook.github.io/react/tips/if-else-in-JSX.html).
@@ -287,7 +300,7 @@ in your home directory.  The file format is YAML, and here is mine:
     - /home/rubys/svn/whimsy/lib
 
     :ldap: ldaps://ldap1-us-east.apache.org:636
-        
+
     :agenda_work: /home/rubys/tmp/agenda
 
 
@@ -296,7 +309,7 @@ value to run the board agenda tool.  The `lib` value is is an array of
 libraries that are to be used instead of gems you may have installed.  This is
 useful if you are making changes to the agenda parsing logic, ruby2js or
 wunderbar.  You can remove this too.  If you drop the `ldap` entry, one will
-be picked randomly for you from the 
+be picked randomly for you from the
 [list of ASF LDAP servers](https://www.pingmybox.com/dashboard?location=304).
 
 With this in place, start the server with `rake server` instead of
@@ -351,7 +364,7 @@ Adding a new modal dialog would involve:
   * Adding any new files to [views/app.js.rb](views/app.js.rb)
   * Adding specifications to [specs/forms_specs.rb](specs/forms_specs.rb) and
     [specs/actions_specs.rb](specs/actions_specs.rb).
-   
+
 
 Gotchas
 ---
@@ -362,7 +375,7 @@ Nothing is perfect.  Here are a few things to watch out for:
    which includes methods like `File.read` and `YAML.parse`.  On the client,
    Ruby code is translated to JavaScript which only has access to JavaScript
    libraries, which includes methods like `history.pushState` and
-   `JSON.stringify`.  
+   `JSON.stringify`.
 
    [Ruby2JS filters](https://github.com/rubys/ruby2js#filters) reduce this
    gap by converting many common Ruby methods calls to JavaScript equivalents
@@ -400,9 +413,9 @@ Further reading:
  * [capybara](https://github.com/jnicklas/capybara#readme) - helps you test
    web applications by simulating how a real user would interact with your app
  * [react](http://facebook.github.io/react/) - a JavaScript library for
-   building user interfaces 
+   building user interfaces
  * [ruby2js](https://github.com/rubys/ruby2jw/#readme) - minimal yet
-   extensible Ruby to JavaScript conversion. 
+   extensible Ruby to JavaScript conversion.
  * [phantomjs](http://phantomjs.org/) -  a headless WebKit scriptable with a
    JavaScript API
  * [sinatra](http://www.sinatrarb.com/) - a
